@@ -1,0 +1,216 @@
+export const MODULES = [
+  {
+    num: "01", level: "basico", levelLabel: "Básico",
+    title: "Fundamentos y Orientación",
+    desc: "Entiende qué es Claude, su arquitectura conceptual, cómo acceder a él y qué lo diferencia de otros modelos de lenguaje.",
+    lessons: [
+      { title: "¿Qué es Claude y cómo piensa?", meta: "Concepto · 15 min" },
+      { title: "Versiones: Haiku, Sonnet, Opus — cuándo usar cada una", meta: "Concepto · 20 min" },
+      { title: "Interfaces: Claude.ai, API, Claude Code, Cowork", meta: "Práctica · 25 min" },
+      { title: "Configuración inicial y primeros pasos", meta: "Práctica · 20 min" },
+      { title: "Cómo Claude procesa el contexto y la memoria", meta: "Concepto · 20 min" },
+    ],
+    tags: ["LLM", "Transformers", "contexto", "ventana de contexto", "tokens"]
+  },
+  {
+    num: "02", level: "basico", levelLabel: "Básico",
+    title: "Prompt Engineering Esencial",
+    desc: "El arte y la ciencia de comunicarse con Claude de forma efectiva. Aprende los patrones fundamentales que multiplican la calidad.",
+    lessons: [
+      { title: "Anatomía de un prompt perfecto", meta: "Concepto · 20 min" },
+      { title: "Instrucciones positivas vs negativas", meta: "Práctica · 20 min" },
+      { title: "Uso de XML tags para estructurar prompts", meta: "Práctica · 25 min" },
+      { title: "Few-shot y zero-shot prompting", meta: "Práctica · 30 min" },
+      { title: "Chain-of-thought y razonamiento paso a paso", meta: "Avanzado · 30 min" },
+    ],
+    tags: ["zero-shot", "few-shot", "CoT", "XML tags", "instrucciones"]
+  },
+  {
+    num: "03", level: "intermedio", levelLabel: "Intermedio",
+    title: "Prompting Avanzado y Técnicas Pro",
+    desc: "Técnicas de nivel senior para extraer el máximo rendimiento: roles, personas, meta-prompting e iteración.",
+    lessons: [
+      { title: "Role-playing y asignación de personas", meta: "Práctica · 25 min" },
+      { title: "Prompting iterativo y auto-refinamiento", meta: "Práctica · 30 min" },
+      { title: "Plantillas reutilizables y variables", meta: "Práctica · 25 min" },
+      { title: "Meta-prompting: pedirle a Claude que genere prompts", meta: "Avanzado · 35 min" },
+      { title: "Control de longitud, tono y formato de salida", meta: "Práctica · 20 min" },
+      { title: "Evaluación y benchmarking de prompts", meta: "Avanzado · 30 min" },
+    ],
+    tags: ["personas", "meta-prompting", "temperatura", "system prompt", "iteración"]
+  },
+  {
+    num: "04", level: "intermedio", levelLabel: "Intermedio",
+    title: "System Prompts y Comportamiento",
+    desc: "Domina el system prompt para definir el comportamiento, personalidad y límites de Claude en cualquier aplicación.",
+    lessons: [
+      { title: "Anatomía del system prompt", meta: "Concepto · 20 min" },
+      { title: "Configurar restricciones y permisos", meta: "Práctica · 25 min" },
+      { title: "Gestión de guardarraíles y seguridad", meta: "Práctica · 30 min" },
+      { title: "Crear asistentes con identidad propia", meta: "Práctica · 25 min" },
+      { title: "Testing y debugging de system prompts", meta: "Avanzado · 35 min" },
+    ],
+    tags: ["system prompt", "guardrails", "identidad", "Constitutional AI"]
+  },
+  {
+    num: "05", level: "avanzado", levelLabel: "Avanzado",
+    title: "Claude API e Integración",
+    desc: "Integra Claude en cualquier aplicación. Streaming, tool use, multimodal y todos los parámetros de la API.",
+    lessons: [
+      { title: "Endpoints, autenticación y primeras llamadas", meta: "Práctica · 30 min" },
+      { title: "Streaming de respuestas en tiempo real", meta: "Práctica · 25 min" },
+      { title: "Gestión de conversaciones multi-turn", meta: "Práctica · 30 min" },
+      { title: "Tool Use / Function Calling", meta: "Avanzado · 45 min" },
+      { title: "Manejo de documentos, imágenes y PDFs", meta: "Práctica · 30 min" },
+      { title: "Batch API y procesamiento masivo", meta: "Avanzado · 35 min" },
+    ],
+    tags: ["REST API", "streaming", "tool use", "multimodal", "tokens", "rate limits"]
+  },
+  {
+    num: "06", level: "avanzado", levelLabel: "Avanzado",
+    title: "Claude Code y Agentes",
+    desc: "Usa Claude como agente autónomo. Flujos agentic, MCP, automatización compleja y pipelines multi-paso.",
+    lessons: [
+      { title: "Claude Code: instalación y flujo básico", meta: "Práctica · 30 min" },
+      { title: "Integración con repositorios y flujo git", meta: "Práctica · 35 min" },
+      { title: "Model Context Protocol (MCP) desde cero", meta: "Avanzado · 45 min" },
+      { title: "Agentes autónomos y flujos multi-paso", meta: "Avanzado · 50 min" },
+      { title: "Orquestación de agentes Claude + Claude", meta: "Experto · 50 min" },
+    ],
+    tags: ["Claude Code", "MCP", "agentes", "agentic AI", "bash", "subagents"]
+  },
+  {
+    num: "07", level: "experto", levelLabel: "Experto",
+    title: "Extensiones y Ecosistema Completo",
+    desc: "Domina todas las extensiones: Cowork, Claude in Chrome, Claude in Excel, Claude in PowerPoint y flujos combinados.",
+    lessons: [
+      { title: "Claude in Chrome: agente de navegación", meta: "Práctica · 30 min" },
+      { title: "Claude in Excel: análisis y automatización", meta: "Práctica · 35 min" },
+      { title: "Claude in PowerPoint: generación de slides", meta: "Práctica · 30 min" },
+      { title: "Claude Cowork: automatización de archivos", meta: "Práctica · 35 min" },
+      { title: "Flujos combinados: Cowork + extensiones", meta: "Experto · 50 min" },
+    ],
+    tags: ["Chrome", "Excel", "PowerPoint", "Cowork", "automatización", "browsing agent"]
+  },
+  {
+    num: "08", level: "experto", levelLabel: "Experto",
+    title: "Casos de Uso Pro y Proyectos Reales",
+    desc: "Aplica todo en escenarios reales: investigación profunda, productos, análisis de datos y escritura a escala.",
+    lessons: [
+      { title: "Deep Research: investigación autónoma avanzada", meta: "Práctica · 40 min" },
+      { title: "Analista de datos con Claude + Code + APIs", meta: "Proyecto · 60 min" },
+      { title: "Construir un producto completo con Claude", meta: "Proyecto · 90 min" },
+      { title: "Pipeline de contenido a escala con Claude", meta: "Proyecto · 60 min" },
+      { title: "Proyecto final: tu asistente personalizado senior", meta: "Proyecto · 90 min" },
+    ],
+    tags: ["deep research", "RAG", "producto", "pipeline", "LLMOps"]
+  }
+];
+
+export const LESSON_CONTENT = {
+  "0-0": {
+    body: `<h2>¿Qué es Claude, exactamente?</h2>
+<p>Claude es un <strong>modelo de lenguaje grande (LLM)</strong> creado por Anthropic. Técnicamente, es una red neuronal transformer entrenada sobre enormes volúmenes de texto humano, y luego alineada con valores mediante <strong>Constitutional AI</strong>.</p>
+<blockquote><p>Claude es una máquina de predicción de texto tan sofisticada que ha desarrollado capacidades emergentes de razonamiento, escritura, análisis y resolución de problemas.</p></blockquote>
+<h2>El mecanismo central</h2>
+<p>Cuando escribes algo, Claude no "busca la respuesta" — predice cuál sería la continuación más útil dado todo el contexto disponible. El proceso tiene 5 etapas:</p>
+<ol>
+  <li><strong>Entrada:</strong> recibe system prompt, historial y tu mensaje concatenados.</li>
+  <li><strong>Tokenización:</strong> el texto se divide en tokens (~4 caracteres). No ve letras, ve IDs numéricos.</li>
+  <li><strong>Embeddings:</strong> cada token se convierte en un vector de miles de dimensiones.</li>
+  <li><strong>Transformer:</strong> ~96 capas de atención donde cada token pondera a todos los demás.</li>
+  <li><strong>Respuesta:</strong> genera la salida token a token — por eso el streaming funciona.</li>
+</ol>
+<div class="callout callout-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div class="callout-body"><strong>Clave pro:</strong> la temperatura controla qué tan determinista es la elección de cada token. Temperatura 0 = siempre el más probable. Temperatura 1 = máxima variedad y creatividad.</div></div>
+<h2>Constitutional AI</h2>
+<p>A diferencia de un LLM base, Claude fue entrenado con una capa de alineación adicional. Anthropic desarrolló <strong>Constitutional AI</strong>: el modelo aprende a evaluar sus propias respuestas contra principios explícitos — honestidad, utilidad, no causar daño.</p>
+<div class="callout callout-tip"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="callout-body"><strong>Consecuencia práctica:</strong> Claude no cambia de opinión solo porque lo presiones. Necesita argumentos reales. Está más dispuesto a ayudarte cuanto más claramente articulas un contexto legítimo.</div></div>
+<h2>Los 3 malentendidos más comunes</h2>
+<ul>
+  <li><strong>"Es un buscador"</strong> — no recupera información en tiempo real. Tiene fecha de corte de conocimiento.</li>
+  <li><strong>"Tiene memoria entre chats"</strong> — cada conversación empieza desde cero. Debes proveer contexto al inicio.</li>
+  <li><strong>"Entiende = sabe"</strong> — puede razonar sobre conceptos sin haberlos experimentado. Verifica afirmaciones factuales importantes.</li>
+</ul>`,
+    exercises: [
+      { num: "01", title: "Siente los tokens", time: "5 min", desc: "Prueba esta tarea para entender por qué Claude procesa tokens, no letras individuales:", prompt: 'Cuenta exactamente cuántas letras "r" hay en la palabra "strawberry".\nLuego explícame por qué este tipo de tarea es difícil para ti.' },
+      { num: "02", title: "Testea la ventana de contexto", time: "10 min", desc: "En una nueva conversación: dile un dato inventado, haz 10 intercambios sobre otros temas, luego pregúntale ese dato.", prompt: 'Mi perro se llama Neptuno y tiene 3 patas.\n[... 10 intercambios después ...]\n¿Cómo se llama mi perro y cuántas patas tiene?' },
+      { num: "03", title: "Recuperación vs razonamiento", time: "10 min", desc: "Compara el estilo de respuesta entre estos dos tipos de preguntas:", prompt: 'Pregunta 1 (recuperación): "¿Cuál es la capital de Francia?"\n\nPregunta 2 (razonamiento): "Si todos los países europeos se fusionaran, ¿qué ciudad sería probablemente la capital y por qué?"' }
+    ]
+  },
+  "0-1": {
+    body: `<h2>La familia Claude</h2>
+<p>Anthropic ofrece modelos de distintos tamaños bajo la misma familia. Cada uno representa un punto diferente en el tradeoff <strong>velocidad / capacidad / costo</strong>.</p>
+<h2>Claude Haiku — velocidad ante todo</h2>
+<p>El modelo más rápido y económico. Ideal para tareas de alto volumen, respuestas cortas, clasificación y extracción de datos estructurados.</p>
+<div class="callout callout-tip"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="callout-body"><strong>Cuándo usarlo:</strong> chatbots de atención al cliente, autocompletado, etiquetado masivo de datos, pipelines de procesamiento a gran escala.</div></div>
+<h2>Claude Sonnet — el equilibrio perfecto</h2>
+<p>El modelo recomendado para la mayoría de los casos cotidianos. Lo suficientemente potente para tareas complejas, lo suficientemente rápido para uso interactivo.</p>
+<div class="callout callout-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div class="callout-body"><strong>Cuándo usarlo:</strong> desarrollo de software, redacción, análisis de documentos, asistentes conversacionales. Es el modelo más versátil y el que usa este curso.</div></div>
+<h2>Claude Opus — máxima capacidad</h2>
+<p>El modelo más capaz. Sobresale en razonamiento complejo, análisis profundo y problemas que los modelos menores no resuelven bien.</p>
+<div class="callout callout-warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div class="callout-body"><strong>Cuándo usarlo:</strong> research avanzado, análisis financiero complejo, código crítico, tareas donde la calidad importa más que el costo.</div></div>
+<h2>Regla de decisión pro</h2>
+<p>Empieza siempre con Sonnet. Si los resultados no son suficientemente buenos, sube a Opus. Si el volumen o costo es un problema, baja a Haiku.</p>`,
+    exercises: [
+      { num: "01", title: "Compara los modelos en la misma tarea", time: "15 min", desc: "Envía exactamente el mismo prompt complejo a Haiku, Sonnet y Opus. Compara profundidad, precisión y tiempo.", prompt: 'Analiza las implicaciones éticas, económicas y sociales de reemplazar el 50% de los trabajos de atención al cliente con IA conversacional en los próximos 5 años.' },
+      { num: "02", title: "Encuentra el límite de Haiku", time: "10 min", desc: "Diseña una tarea de razonamiento multi-paso que Haiku no pueda resolver bien pero Sonnet sí.", prompt: 'Dado que: A > B, B > C, D > A, C > E, E > F.\nOrdena todas las letras de mayor a menor y explica cada paso de tu razonamiento.' }
+    ]
+  },
+  "1-0": {
+    body: `<h2>¿Qué hace a un prompt "perfecto"?</h2>
+<p>Un prompt perfecto reduce al máximo la ambigüedad, le da a Claude exactamente la información que necesita y anticipa los malentendidos más probables.</p>
+<h2>Los 5 componentes</h2>
+<ol>
+  <li><strong>Rol / Persona:</strong> ¿Quién debe ser Claude? "Actúa como un senior developer de Python..."</li>
+  <li><strong>Contexto:</strong> ¿Cuál es la situación? ¿Qué antecedentes necesita Claude?</li>
+  <li><strong>Tarea:</strong> ¿Qué debe hacer exactamente? Verbos específicos: analiza, resume, genera, clasifica.</li>
+  <li><strong>Formato:</strong> ¿Cómo debe estructurarse la respuesta? Bullet points, tabla, JSON, longitud máxima.</li>
+  <li><strong>Restricciones:</strong> ¿Qué no debe hacer? ¿Qué límites aplican?</li>
+</ol>
+<div class="callout callout-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div class="callout-body"><strong>No todos los prompts necesitan los 5 componentes.</strong> Para tareas simples, 2–3 son suficientes. Incluye lo que reduzca ambigüedad significativa, omite lo obvio.</div></div>
+<h2>Prompt débil vs prompt fuerte</h2>
+<p><strong>Débil:</strong></p>
+<pre>Escribe sobre inteligencia artificial.</pre>
+<p><strong>Fuerte:</strong></p>
+<pre>Actúa como periodista tecnológico para un público ejecutivo no técnico.
+Escribe una introducción de 150 palabras sobre el impacto de la IA
+generativa en el sector financiero en 2025.
+Tono: directo y sin jerga técnica.
+No incluyas predicciones sin datos que las respalden.</pre>
+<h2>El principio de especificidad progresiva</h2>
+<p>Empieza con un prompt razonablemente completo, evalúa la respuesta, identifica qué componente faltó, y añade solo esa especificidad en la siguiente iteración. No sobre-especifiques desde el inicio.</p>`,
+    exercises: [
+      { num: "01", title: "Autopsia de un prompt fallido", time: "10 min", desc: "Escribe el prompt más vago posible, observa la respuesta, identifica qué componentes faltaron y reescríbelo.", prompt: 'Versión vaga: "Ayúdame con mi presentación"\n\nVersión completa:\nRol: [expertise necesario]\nContexto: [situación y antecedentes]\nTarea: [verbo + qué exactamente]\nFormato: [estructura]\nRestricciones: [límites]' },
+      { num: "02", title: "Construye tu plantilla maestra", time: "20 min", desc: "Diseña una plantilla reutilizable para el tipo de tarea que más usas con Claude. Pruébala con 3 casos reales.", prompt: 'Actúa como [rol experto].\n\n<contexto>\n[situación y antecedentes relevantes]\n</contexto>\n\n<tarea>\n[verbo específico] + [qué exactamente]\n</tarea>\n\n<formato>\n[estructura de la respuesta]\n</formato>\n\n<restricciones>\n[qué evitar]\n</restricciones>' }
+    ]
+  }
+};
+
+export const QUIZ = [
+  { q: "¿Cuál es la diferencia clave entre Claude Haiku, Sonnet y Opus?", opts: ["Solo difieren en precio", "Velocidad, capacidad y costo — Haiku más rápido/barato, Opus más capaz/costoso", "Haiku es solo para texto, Opus solo para código", "No hay diferencia real"], correct: 1, feedback: "Haiku prioriza velocidad y bajo costo, Sonnet equilibra para uso cotidiano, Opus ofrece máxima capacidad para tareas complejas." },
+  { q: "¿Qué técnica mejora más la precisión en problemas lógicos complejos?", opts: ["Few-shot con ejemplos simples", "Zero-shot directo", "Chain-of-Thought — razonamiento paso a paso", "Usar mayúsculas en instrucciones clave"], correct: 2, feedback: "Chain-of-Thought fuerza al modelo a razonar explícitamente antes de concluir, reduciendo errores en tareas de razonamiento complejo." },
+  { q: "¿Qué es el Model Context Protocol (MCP)?", opts: ["Una forma de comprimir tokens", "Un protocolo para conectar Claude con herramientas y datos externos de forma estandarizada", "El límite máximo de contexto de Claude", "Un método de fine-tuning del modelo"], correct: 1, feedback: "MCP es el estándar abierto de Anthropic para conectar Claude a cualquier fuente de datos o herramienta externa de forma estandarizada." },
+  { q: "¿Cuándo usar XML tags en un prompt?", opts: ["Solo para código HTML", "Para separar claramente partes del prompt: contexto, instrucción, ejemplos, datos", "Solo son útiles en el system prompt", "No tienen ningún efecto en la calidad"], correct: 1, feedback: "XML tags como <contexto>, <instrucciones>, <ejemplos> ayudan a Claude a identificar y procesar cada sección con mayor precisión." },
+  { q: "¿Qué parámetro controla la creatividad vs precisión de Claude?", opts: ["max_tokens", "top_p", "temperature", "frequency_penalty"], correct: 2, feedback: "La temperatura (0–1) controla la aleatoriedad. Valores bajos = precisión. Valores altos = mayor creatividad y variedad." },
+  { q: "¿Qué significa que Claude genere respuestas 'token a token'?", opts: ["Que cobra por cada palabra", "Que produce la respuesta completa en un solo paso", "Que construye la respuesta secuencialmente, cada pieza basada en las anteriores", "Que necesita revisar el texto antes de mostrarlo"], correct: 2, feedback: "Claude genera cada token mirando todos los anteriores. Esto explica el streaming y por qué a veces cambia de dirección a mitad de una respuesta." },
+  { q: "¿Cuál es el propósito del system prompt?", opts: ["Solo para dar instrucciones de formato", "Definir comportamiento, personalidad y restricciones de Claude antes de cualquier interacción", "Es lo mismo que el primer mensaje del usuario", "Solo lo pueden usar administradores de Anthropic"], correct: 1, feedback: "El system prompt es el ADN invisible del asistente — define cómo se comporta, qué puede hacer y qué límites respeta, antes de cualquier interacción." },
+  { q: "¿Qué es Constitutional AI?", opts: ["Un tipo de arquitectura de red neuronal", "El método donde el modelo aprende a auto-evaluar sus respuestas según principios de seguridad explícitos", "Un protocolo de comunicación entre modelos", "El nombre del equipo de seguridad de Anthropic"], correct: 1, feedback: "Constitutional AI es la técnica de Anthropic donde el modelo aprende a criticar y mejorar sus propias respuestas usando principios éticos definidos." }
+];
+
+export const GLOSSARY = [
+  { term: "Token", def: "Unidad mínima de texto que Claude procesa (~4 caracteres). Clave para entender costos y límites.", tag: "Fundamentos" },
+  { term: "Ventana de contexto", def: "Cantidad máxima de tokens que Claude procesa en una conversación. Claude Sonnet 4.6 tiene 200K tokens.", tag: "Fundamentos" },
+  { term: "System Prompt", def: "Instrucciones invisibles al usuario que definen el comportamiento de Claude. El ADN de un asistente.", tag: "Prompting" },
+  { term: "Tool Use / Function Calling", def: "Capacidad de Claude para invocar herramientas externas (APIs, bases de datos) de forma estructurada.", tag: "API" },
+  { term: "MCP (Model Context Protocol)", def: "Protocolo abierto de Anthropic para conectar Claude a herramientas y servicios externos. El USB-C de la IA.", tag: "Agentes" },
+  { term: "Chain-of-Thought (CoT)", def: "Técnica de prompting donde se pide a Claude que razone paso a paso antes de dar la respuesta final.", tag: "Prompting" },
+  { term: "Few-shot Prompting", def: "Incluir ejemplos de input/output en el prompt para que Claude aprenda el patrón deseado.", tag: "Prompting" },
+  { term: "Streaming", def: "Modo donde los tokens se envían al cliente conforme se generan, en lugar de esperar la respuesta completa.", tag: "API" },
+  { term: "Constitutional AI", def: "Método de entrenamiento donde el modelo aprende a auto-evaluar sus respuestas según principios de seguridad.", tag: "Fundamentos" },
+  { term: "Agente (Agentic AI)", def: "Claude en modo autónomo: planifica, usa herramientas y ejecuta acciones para completar objetivos complejos.", tag: "Agentes" },
+  { term: "RAG", def: "Retrieval-Augmented Generation: técnica para alimentar a Claude con documentos externos en tiempo real.", tag: "API" },
+  { term: "Temperatura", def: "Parámetro (0–1) que controla la aleatoriedad de Claude. 0 = determinista, 1 = máxima creatividad.", tag: "API" },
+  { term: "Embedding", def: "Representación numérica de un token en un espacio vectorial de alta dimensión que captura relaciones semánticas.", tag: "Fundamentos" },
+  { term: "Zero-shot", def: "Pedir a Claude que realice una tarea sin darle ejemplos previos. Funciona bien para tareas comunes.", tag: "Prompting" },
+  { term: "Meta-prompting", def: "Pedirle a Claude que genere o mejore prompts para otras tareas.", tag: "Prompting" },
+];

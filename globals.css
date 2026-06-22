@@ -1,0 +1,546 @@
+'use client'
+import { useState, useEffect, useCallback } from 'react'
+import { MODULES, LESSON_CONTENT, QUIZ, GLOSSARY } from '../lib/data'
+
+// ── SVG ICONS ────────────────────────────────────────────────────────────────
+const Icon = {
+  Home: () => <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Quiz: () => <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+  Book: () => <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>,
+  User: () => <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  Award: () => <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>,
+  ArrowLeft: () => <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
+  ArrowRight: () => <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+  Check: () => <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>,
+  Play: () => <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
+  Refresh: () => <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>,
+  Menu: () => <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  Search: () => <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Lock: () => <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>,
+  Star: () => <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  Printer: () => <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
+  Info: () => <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+  Trophy: () => <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>,
+}
+
+// ── PROGRESS HELPERS ─────────────────────────────────────────────────────────
+const STORAGE_KEY = 'cc_progress_v2'
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') } catch { return {} }
+}
+function saveProgress(p) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)) } catch {}
+}
+function getTotalLessons() { return MODULES.reduce((a, m) => a + m.lessons.length, 0) }
+function getCompletedCount(p) { return Object.keys(p).filter(k => k.startsWith('l_')).length }
+function isLessonDone(p, mi, li) { return !!p[`l_${mi}_${li}`] }
+function getModProg(p, mi) {
+  const total = MODULES[mi].lessons.length
+  const done = MODULES[mi].lessons.filter((_, li) => isLessonDone(p, mi, li)).length
+  return { done, total, pct: total ? Math.round((done / total) * 100) : 0 }
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+function Sidebar({ page, progress, onNav, onModule }) {
+  const done = getCompletedCount(progress)
+  const total = getTotalLessons()
+  const pct = total ? Math.round((done / total) * 100) : 0
+
+  return (
+    <nav className="sidebar" id="sidebar">
+      <div className="sidebar-logo">
+        <span className="logo-wordmark" onClick={() => onNav('home')}>Domina Claude</span>
+        <div className="logo-sub">Programa Pro Senior</div>
+      </div>
+      <div className="sidebar-progress">
+        <div className="prog-row">
+          <span className="prog-label">Progreso</span>
+          <span className="prog-pct">{pct}%</span>
+        </div>
+        <div className="prog-track"><div className="prog-fill" style={{ width: `${pct}%` }} /></div>
+      </div>
+      <div className="sidebar-nav">
+        <div className="nav-group-label">General</div>
+        {[
+          { id: 'home', label: 'Inicio', Icon: Icon.Home },
+          { id: 'quiz', label: 'Quiz de evaluación', Icon: Icon.Quiz },
+          { id: 'glossary', label: 'Glosario', Icon: Icon.Book },
+          { id: 'profile', label: 'Mi perfil', Icon: Icon.User },
+          { id: 'certificate', label: 'Certificado', Icon: Icon.Award },
+        ].map(({ id, label, Icon: I }) => (
+          <a key={id} className={`nav-link${page === id ? ' active' : ''}`} onClick={() => onNav(id)}>
+            <I />{label}
+          </a>
+        ))}
+        <div className="nav-group-label" style={{ marginTop: '.5rem' }}>Módulos</div>
+        {MODULES.map((m, mi) => {
+          const { done, total } = getModProg(progress, mi)
+          return (
+            <div key={mi} className="nav-mod-row" onClick={() => onModule(mi)}>
+              <span className="nav-mod-num">{m.num}</span>
+              <span className="nav-mod-title">{m.title}</span>
+              <span className="nav-mod-done">{done}/{total}</span>
+            </div>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
+
+// ── HOME PAGE ─────────────────────────────────────────────────────────────────
+function HomePage({ progress, onModule }) {
+  return (
+    <div className={`page active`} id="page-home">
+      <div className="home-hero">
+        <div className="hero-kicker">Programa completo · Actualizado 2025</div>
+        <h1 className="hero-h1">Domina <em>Claude</em><br />de 0 a 100</h1>
+        <p className="hero-sub">El curso más completo para convertirte en experto senior — desde fundamentos hasta agentes autónomos, API avanzada y todo el ecosistema.</p>
+        <div className="hero-actions">
+          <button className="btn btn-primary" onClick={() => onModule(0)}><Icon.Play /> Comenzar el curso</button>
+          <button className="btn btn-outline" onClick={() => document.querySelector('[data-nav="quiz"]')?.click()}>Evalúa tu nivel</button>
+        </div>
+        <p className="hero-note">Acceso completo gratuito · Sin registro requerido · Progreso guardado localmente</p>
+      </div>
+      <div className="stats-strip">
+        {[['8', 'Módulos'], ['42', 'Lecciones'], ['12h', 'Tiempo estimado'], ['5', 'Niveles']].map(([n, l]) => (
+          <div key={l} className="stat-item">
+            <div className="stat-n">{n}</div>
+            <div className="stat-l">{l}</div>
+          </div>
+        ))}
+      </div>
+      <div className="modules-index">
+        <div className="index-header">
+          <h2 className="index-h2">Contenido del programa</h2>
+          <span className="index-meta">{MODULES.length} módulos · {getTotalLessons()} lecciones</span>
+        </div>
+        {MODULES.map((m, mi) => {
+          const { done, total, pct } = getModProg(progress, mi)
+          const complete = done === total && total > 0 && done > 0
+          return (
+            <div key={mi} className={`module-row${complete ? ' completed' : ''}`} onClick={() => onModule(mi)}>
+              <div className="mod-row-num">{m.num}</div>
+              <div className="mod-row-body">
+                <div className="mod-row-title">{m.title}</div>
+                <div className="mod-row-desc">{m.desc}</div>
+              </div>
+              <div className="mod-row-right">
+                <span className={`mod-level-badge lv-${m.level}`}>{m.levelLabel}</span>
+                <span className="mod-row-progress">{done}/{total} lecciones</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── MODULE PAGE ───────────────────────────────────────────────────────────────
+function ModulePage({ mi, progress, onBack, onLesson, onMarkDone }) {
+  const m = MODULES[mi]
+  const { done, total } = getModProg(progress, mi)
+  return (
+    <div className="page active" id="page-module">
+      <div className="topbar">
+        <div className="topbar-left">
+          <div className="topbar-title">Módulo {m.num} — {m.title}</div>
+          <div className="topbar-meta">{done} de {total} lecciones completadas</div>
+        </div>
+        <div className="topbar-right">
+          <button className="btn btn-outline" onClick={onBack}><Icon.ArrowLeft /> Volver</button>
+        </div>
+      </div>
+      <div className="mod-page">
+        <div className="breadcrumb" onClick={onBack}><Icon.ArrowLeft /> Todos los módulos</div>
+        <div className="mod-page-header">
+          <div className="mod-chapter-bg">{m.num}</div>
+          <div className="mod-page-kicker">Módulo {m.num} · {m.levelLabel}</div>
+          <h1 className="mod-page-h1">{m.title}</h1>
+          <p className="mod-page-desc">{m.desc}</p>
+        </div>
+        <div className="lessons-table">
+          <div className="lessons-table-header">
+            <span>#</span><span>Lección</span><span>Duración</span><span></span>
+          </div>
+          {m.lessons.map((l, li) => {
+            const done = isLessonDone(progress, mi, li)
+            return (
+              <div key={li} className={`lesson-table-row${done ? ' done' : ''}`} onClick={() => onLesson(mi, li)}>
+                <span className="lt-num">{String(li + 1).padStart(2, '0')}</span>
+                <span className="lt-title">{l.title}</span>
+                <span className="lt-meta">{l.meta}</span>
+                <span className="lt-status"><span className={`status-dot${done ? ' done' : ''}`} /></span>
+              </div>
+            )
+          })}
+        </div>
+        <div className="concepts-row">
+          <div className="concepts-label">Conceptos clave</div>
+          <div className="concepts-list">{m.tags.map(t => <span key={t} className="concept-pill">{t}</span>)}</div>
+        </div>
+        <button className="btn btn-primary" onClick={() => onLesson(mi, 0)}>
+          <Icon.Play /> {done > 0 ? 'Continuar módulo' : 'Comenzar módulo'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── LESSON PAGE ───────────────────────────────────────────────────────────────
+function LessonPage({ mi, li, progress, onBack, onComplete, onPrev, onNext }) {
+  const mod = MODULES[mi]
+  const lesson = mod.lessons[li]
+  const key = `${mi}-${li}`
+  const data = LESSON_CONTENT[key] || {
+    body: `<h2>Introducción</h2><p>Esta lección cubre en profundidad: <strong>${lesson.title}</strong></p><div class="callout callout-info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div class="callout-body"><strong>Contenido en expansión.</strong> Esta lección está siendo desarrollada. Practica el concepto con el ejercicio a continuación.</div></div><h2>Conceptos del módulo</h2><ul>${mod.tags.map(t => `<li><code>${t}</code></li>`).join('')}</ul>`,
+    exercises: [{ num: '01', title: 'Exploración guiada', time: '15 min', desc: `Practica "${lesson.title}" directamente con Claude.`, prompt: `Quiero aprender sobre "${lesson.title}". Dame un ejemplo práctico paso a paso y un ejercicio para practicar.` }]
+  }
+  const isDone = isLessonDone(progress, mi, li)
+  const hasPrev = li > 0 || mi > 0
+  const hasNext = li < mod.lessons.length - 1 || mi < MODULES.length - 1
+
+  return (
+    <div className="page active" id="page-lesson">
+      <div className="topbar">
+        <div className="topbar-left">
+          <div className="topbar-title">{lesson.title}</div>
+          <div className="topbar-meta">Módulo {mod.num} · Lección {li + 1} de {mod.lessons.length}</div>
+        </div>
+        <div className="topbar-right">
+          <button className={`btn ${isDone ? 'btn-signal' : 'btn-outline'}`} onClick={() => onComplete(mi, li)}>
+            {isDone ? <><Icon.Check /> Completada</> : 'Marcar completada'}
+          </button>
+        </div>
+      </div>
+      <div className="lesson-page">
+        <div className="breadcrumb" onClick={onBack}><Icon.ArrowLeft /> {mod.title}</div>
+        <h1 className="lesson-h1">{lesson.title}</h1>
+        <div className="lesson-byline">
+          <span>Módulo {mod.num}</span>
+          <span className="byline-sep">·</span>
+          <span>{lesson.meta}</span>
+          {isDone && <><span className="byline-sep">·</span><span className="done-badge">✓ Completada</span></>}
+        </div>
+        <div className="lesson-body" dangerouslySetInnerHTML={{ __html: data.body }} />
+        {data.exercises?.length > 0 && (
+          <div className="exercises-section">
+            <h2 className="exercises-h">Ejercicios prácticos</h2>
+            {data.exercises.map((ex, i) => (
+              <div key={i} className="exercise">
+                <div className="exercise-head">
+                  <span className="ex-num">Ejercicio {ex.num}</span>
+                  <span className="ex-title">{ex.title}</span>
+                  <span className="ex-time">{ex.time}</span>
+                </div>
+                <div className="exercise-body">
+                  {ex.desc}
+                  <div className="exercise-prompt">{ex.prompt}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="lesson-nav-bar">
+          {hasPrev
+            ? <button className="btn btn-outline" onClick={onPrev}><Icon.ArrowLeft /> Anterior</button>
+            : <div />}
+          <div className="spacer" />
+          <button className="btn btn-primary" onClick={() => { onComplete(mi, li); onNext(mi, li) }}>
+            {hasNext ? <>Completar y continuar <Icon.ArrowRight /></> : <>Completar módulo <Icon.Trophy /></>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── QUIZ PAGE ─────────────────────────────────────────────────────────────────
+function QuizPage() {
+  const [idx, setIdx] = useState(0)
+  const [score, setScore] = useState(0)
+  const [answers, setAnswers] = useState([])
+  const [chosen, setChosen] = useState(null)
+  const [done, setDone] = useState(false)
+
+  function answer(i) {
+    if (chosen !== null) return
+    setChosen(i)
+    const correct = i === QUIZ[idx].correct
+    if (correct) setScore(s => s + 1)
+    setAnswers(a => [...a, correct])
+  }
+
+  function next() {
+    if (idx + 1 >= QUIZ.length) { setDone(true); return }
+    setIdx(i => i + 1)
+    setChosen(null)
+  }
+
+  function restart() { setIdx(0); setScore(0); setAnswers([]); setChosen(null); setDone(false) }
+
+  if (done) {
+    const pct = Math.round((score / QUIZ.length) * 100)
+    const msg = pct >= 80 ? 'Excelente dominio. Listo para avanzar al nivel experto.' : pct >= 60 ? 'Buen nivel. Refuerza los temas donde fallaste.' : 'Revisa los módulos fundamentales antes de continuar.'
+    return (
+      <div className="page active" id="page-quiz">
+        <div className="topbar"><div className="topbar-left"><div className="topbar-title">Quiz de evaluación</div></div></div>
+        <div className="quiz-wrap">
+          <div className="quiz-result">
+            <div className="result-pct">{pct}<span>%</span></div>
+            <div className="result-label">{score} de {QUIZ.length} respuestas correctas — {msg}</div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className="btn btn-primary" onClick={restart}><Icon.Refresh /> Repetir quiz</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const q = QUIZ[idx]
+  return (
+    <div className="page active" id="page-quiz">
+      <div className="topbar"><div className="topbar-left"><div className="topbar-title">Quiz de evaluación</div><div className="topbar-meta">Pon a prueba tu conocimiento</div></div></div>
+      <div className="quiz-wrap">
+        <h1 className="quiz-h1">Evaluación</h1>
+        <p className="quiz-lead">{QUIZ.length} preguntas · Tiempo libre · Feedback inmediato</p>
+        <div className="quiz-progress-strip">
+          {QUIZ.map((_, i) => {
+            let cls = 'qp-seg'
+            if (i < answers.length) cls += answers[i] ? ' correct' : ' wrong'
+            else if (i === idx) cls += ' answered'
+            return <div key={i} className={cls} />
+          })}
+        </div>
+        <div className="question-n">Pregunta {idx + 1} de {QUIZ.length} · Puntuación: {score}</div>
+        <div className="question-text">{q.q}</div>
+        <div className="quiz-opts">
+          {q.opts.map((o, i) => {
+            let cls = 'quiz-opt'
+            if (chosen !== null) {
+              if (i === q.correct) cls += ' correct'
+              else if (i === chosen && chosen !== q.correct) cls += ' wrong'
+            }
+            return <button key={i} className={cls} onClick={() => answer(i)} disabled={chosen !== null}>{o}</button>
+          })}
+        </div>
+        {chosen !== null && (
+          <>
+            <div className={`quiz-feedback show ${chosen === q.correct ? 'ok' : 'fail'}`}>
+              <strong>{chosen === q.correct ? '✓ Correcto.' : '✗ Incorrecto.'}</strong> {q.feedback}
+            </div>
+            <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={next}>
+              {idx < QUIZ.length - 1 ? <>Siguiente <Icon.ArrowRight /></> : <>Ver resultados <Icon.Trophy /></>}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── GLOSSARY PAGE ─────────────────────────────────────────────────────────────
+function GlossaryPage() {
+  const [filter, setFilter] = useState('')
+  const filtered = filter ? GLOSSARY.filter(g => g.term.toLowerCase().includes(filter.toLowerCase()) || g.def.toLowerCase().includes(filter.toLowerCase())) : GLOSSARY
+  return (
+    <div className="page active" id="page-glossary">
+      <div className="topbar"><div className="topbar-left"><div className="topbar-title">Glosario</div><div className="topbar-meta">{GLOSSARY.length} términos clave</div></div></div>
+      <div className="glossary-wrap">
+        <h1 className="glos-h1">Glosario</h1>
+        <p className="glos-lead">Términos esenciales del ecosistema Claude y la IA generativa.</p>
+        <div className="glos-search">
+          <Icon.Search />
+          <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Buscar término..." />
+        </div>
+        <table className="glos-table">
+          <thead><tr><th>Término</th><th>Definición</th><th>Área</th></tr></thead>
+          <tbody>
+            {filtered.map((g, i) => (
+              <tr key={i}>
+                <td><span className="glos-term">{g.term}</span></td>
+                <td><span className="glos-def">{g.def}</span></td>
+                <td><span className="glos-tag">{g.tag}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ── PROFILE PAGE ──────────────────────────────────────────────────────────────
+function ProfilePage({ progress, onReset }) {
+  const done = getCompletedCount(progress)
+  const total = getTotalLessons()
+  const pct = total ? Math.round((done / total) * 100) : 0
+  const modsCompleted = MODULES.filter((_, mi) => { const p = getModProg(progress, mi); return p.done === p.total && p.total > 0 && p.done > 0 }).length
+
+  const achievements = [
+    { icon: Icon.Play, label: 'Primera lección', earned: done >= 1 },
+    { icon: Icon.Check, label: '5 lecciones completadas', earned: done >= 5 },
+    { icon: Icon.Star, label: '10 lecciones completadas', earned: done >= 10 },
+    { icon: Icon.Book, label: 'Módulo completo', earned: modsCompleted >= 1 },
+    { icon: Icon.Trophy, label: 'Mitad del curso', earned: pct >= 50 },
+    { icon: Icon.Award, label: 'Curso completo', earned: pct === 100 },
+  ]
+
+  return (
+    <div className="page active" id="page-profile">
+      <div className="topbar">
+        <div className="topbar-left"><div className="topbar-title">Mi perfil</div><div className="topbar-meta">Progreso y estadísticas</div></div>
+        <div className="topbar-right">
+          <button className="btn btn-outline" onClick={onReset}><Icon.Refresh /> Reiniciar</button>
+        </div>
+      </div>
+      <div className="profile-wrap">
+        <h1 className="profile-h1">Mi progreso</h1>
+        <div className="stats-4">
+          {[[done, 'Completadas'], [total - done, 'Pendientes'], [modsCompleted, 'Módulos'], [pct + '%', 'Total']].map(([n, l]) => (
+            <div key={l} className="stat4-cell"><div className="stat4-n">{n}</div><div className="stat4-l">{l}</div></div>
+          ))}
+        </div>
+        <div className="progress-section">
+          <div className="ps-header"><span className="ps-title">Por módulo</span></div>
+          {MODULES.map((m, mi) => {
+            const { done, total, pct } = getModProg(progress, mi)
+            return (
+              <div key={mi} className="module-progress-row">
+                <span className="mpr-num">{m.num}</span>
+                <span className="mpr-name">{m.title}</span>
+                <div className="mpr-bar"><div className="mpr-fill" style={{ width: `${pct}%` }} /></div>
+                <span className="mpr-pct">{pct}%</span>
+              </div>
+            )
+          })}
+        </div>
+        <div className="achievements-section">
+          <div className="ach-title">Logros</div>
+          <div className="ach-list">
+            {achievements.map((a, i) => (
+              <div key={i} className={`ach-item${a.earned ? ' earned' : ''}`}>
+                <a.icon />{a.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── CERTIFICATE PAGE ──────────────────────────────────────────────────────────
+function CertificatePage({ progress }) {
+  const done = getCompletedCount(progress)
+  const total = getTotalLessons()
+  const pct = total ? Math.round((done / total) * 100) : 0
+  const today = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+
+  if (pct < 100) return (
+    <div className="page active" id="page-certificate">
+      <div className="topbar"><div className="topbar-left"><div className="topbar-title">Certificado</div></div></div>
+      <div className="cert-wrap">
+        <div className="cert-locked">
+          <div className="cert-lock-icon"><Icon.Lock /></div>
+          <h2 className="cert-lock-h">Completa el curso para obtener tu certificado</h2>
+          <p className="cert-lock-p">Has completado el {pct}% del curso ({done} de {total} lecciones). Termina todas las lecciones para desbloquear tu certificado.</p>
+          <div className="cert-prog-row"><span>Progreso actual</span><span>{pct}%</span></div>
+          <div className="cert-prog-track"><div className="cert-prog-fill" style={{ width: `${pct}%` }} /></div>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="page active" id="page-certificate">
+      <div className="topbar"><div className="topbar-left"><div className="topbar-title">Certificado</div></div>
+        <div className="topbar-right"><button className="btn btn-outline" onClick={() => window.print()}><Icon.Printer /> Imprimir</button></div>
+      </div>
+      <div className="cert-wrap">
+        <div className="cert-doc">
+          <div className="cert-kicker">Certificado de finalización</div>
+          <h1 className="cert-title">Domina <em>Claude</em></h1>
+          <div className="cert-divider" />
+          <p className="cert-body">Este certificado acredita la finalización exitosa del programa completo de 8 módulos y 42 lecciones sobre el uso profesional avanzado de Claude.</p>
+          <div className="cert-date">{today} · Nivel Pro Senior</div>
+          <button className="btn btn-primary" onClick={() => window.print()}><Icon.Printer /> Descargar / Imprimir</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────────────────────
+export default function App() {
+  const [page, setPage] = useState('home')
+  const [currentMod, setCurrentMod] = useState(0)
+  const [currentLes, setCurrentLes] = useState(0)
+  const [progress, setProgress] = useState({})
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setProgress(loadProgress()); setMounted(true) }, [])
+
+  const updateProgress = useCallback((newP) => { setProgress(newP); saveProgress(newP) }, [])
+
+  function toggleLesson(mi, li) {
+    const key = `l_${mi}_${li}`
+    const newP = { ...progress }
+    if (newP[key]) delete newP[key]; else newP[key] = 1
+    updateProgress(newP)
+  }
+
+  function markDone(mi, li) {
+    const key = `l_${mi}_${li}`
+    if (!progress[key]) updateProgress({ ...progress, [key]: 1 })
+  }
+
+  function goNext(mi, li) {
+    const mod = MODULES[mi]
+    if (li < mod.lessons.length - 1) { setCurrentLes(li + 1); setPage('lesson') }
+    else if (mi < MODULES.length - 1) { setCurrentMod(mi + 1); setPage('module') }
+    else setPage('certificate')
+  }
+
+  function goPrev(mi, li) {
+    if (li > 0) { setCurrentLes(li - 1); setPage('lesson') }
+    else if (mi > 0) { setCurrentMod(mi - 1); setPage('module') }
+  }
+
+  if (!mounted) return null
+
+  const closeSidebar = () => setSidebarOpen(false)
+
+  return (
+    <div className="app">
+      {sidebarOpen && <div className="mobile-overlay show" onClick={closeSidebar} />}
+      <div id="sidebar" className={`sidebar${sidebarOpen ? ' open' : ''}`}>
+        <Sidebar
+          page={page}
+          progress={progress}
+          onNav={(p) => { setPage(p); closeSidebar() }}
+          onModule={(mi) => { setCurrentMod(mi); setPage('module'); closeSidebar() }}
+        />
+      </div>
+      <main className="main">
+        <div className="mobile-top">
+          <button className="mobile-menu-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Menú">
+            <Icon.Menu />
+          </button>
+          <span className="mobile-title">Domina Claude</span>
+        </div>
+
+        {page === 'home' && <HomePage progress={progress} onModule={(mi) => { setCurrentMod(mi); setPage('module') }} />}
+        {page === 'module' && <ModulePage mi={currentMod} progress={progress} onBack={() => setPage('home')} onLesson={(mi, li) => { setCurrentMod(mi); setCurrentLes(li); setPage('lesson') }} onMarkDone={toggleLesson} />}
+        {page === 'lesson' && <LessonPage mi={currentMod} li={currentLes} progress={progress} onBack={() => setPage('module')} onComplete={toggleLesson} onNext={goNext} onPrev={goPrev} />}
+        {page === 'quiz' && <QuizPage />}
+        {page === 'glossary' && <GlossaryPage />}
+        {page === 'profile' && <ProfilePage progress={progress} onReset={() => { if (confirm('¿Reiniciar todo el progreso?')) { updateProgress({}); setPage('home') } }} />}
+        {page === 'certificate' && <CertificatePage progress={progress} />}
+      </main>
+    </div>
+  )
+}

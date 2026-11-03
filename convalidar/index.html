@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso del postulante · Convalidación UNAB</title>
+<style>
+  :root{
+    --bg:#eef1f5; --surface:#ffffff; --ink:#0e1b29; --muted:#5a6b7b;
+    --line:#e0e6ed; --line-2:#eef2f6;
+    --brand:#0a2a43; --brand-2:#16708c; --accent:#1f9d6b; --accent-d:#157a52;
+    --warn:#d98a2b; --err:#c8453a; --soft:#f3f6f9;
+    --shadow:0 1px 2px rgba(14,27,41,.05), 0 8px 28px rgba(14,27,41,.07);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:var(--bg);
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:780px; margin:0 auto; padding:0 20px 80px}
+
+  /* Header */
+  header{
+    background:linear-gradient(160deg,var(--brand) 0%, #103a59 100%);
+    color:#fff; padding:34px 0 30px; margin-bottom:30px;
+    border-bottom:3px solid var(--brand-2);
+  }
+  header .wrap{padding-bottom:0}
+  .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.04em}
+  .brand .mark{
+    width:34px;height:34px;border-radius:8px;display:grid;place-items:center;
+    background:var(--brand-2); font-size:18px; font-weight:900;
+  }
+  .brand .mark span{transform:translateY(-1px)}
+  .flow{margin-top:16px; display:flex; align-items:center; gap:8px; font-size:.74rem;
+    font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#b9d2dd}
+  .flow .dot{width:7px;height:7px;border-radius:50%;background:#3c6783}
+  .flow .dot.on{background:var(--brand-2); box-shadow:0 0 0 3px rgba(22,112,140,.35)}
+  .flow .sep{flex:0 0 22px; height:1px; background:#3c6783}
+  h1{font-size:1.7rem; line-height:1.15; margin:14px 0 8px; font-weight:800; letter-spacing:-.01em}
+  header p{margin:0; color:#b9d2dd; max-width:54ch; font-size:.97rem}
+
+  /* Step card */
+  .step{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:24px 22px; margin-bottom:18px;
+  }
+  .step-lbl{display:flex; align-items:center; gap:10px; font-size:.78rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.09em; color:var(--brand-2); margin-bottom:18px}
+  .step-lbl .n{width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;
+    display:grid;place-items:center;font-size:.72rem}
+
+  /* Form */
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .field{display:flex; flex-direction:column; gap:6px; min-width:0}
+  .field.full{grid-column:1 / -1}
+  .field > label{font-size:.84rem; font-weight:600; color:var(--ink)}
+  .field .opt{color:var(--muted); font-weight:500}
+  input[type=text],input[type=email],input[type=tel],select{
+    width:100%; padding:13px 14px; font-size:1rem; font-family:inherit;
+    border:1.5px solid var(--line); border-radius:10px; background:#fff; color:var(--ink);
+    appearance:none;
+  }
+  select{cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6b7b' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat; background-position:right 14px center;
+  }
+  input:focus,select:focus{outline:none; border-color:var(--brand-2); box-shadow:0 0 0 3px rgba(22,112,140,.15)}
+  .field.err input,.field.err select{border-color:var(--err); box-shadow:0 0 0 3px rgba(200,69,58,.12)}
+  .msg{font-size:.8rem; color:var(--err); min-height:0; display:none}
+  .field.err .msg{display:block}
+  .hint{font-size:.78rem; color:var(--muted)}
+
+  /* Consent */
+  .consent{display:flex; gap:11px; align-items:flex-start; margin-top:4px;
+    background:var(--soft); border:1px solid var(--line-2); border-radius:10px; padding:13px 14px}
+  .consent input{margin-top:3px; width:18px; height:18px; accent-color:var(--brand-2); flex:0 0 auto; cursor:pointer}
+  .consent label{font-size:.85rem; color:#33495a; line-height:1.45; cursor:pointer}
+  .consent a{color:var(--brand-2); font-weight:600}
+  .consent.err{border-color:var(--err); background:#fbf0ef}
+
+  /* Run button */
+  .run-row{display:flex; justify-content:flex-end; margin-top:8px}
+  .btn{
+    border:none; border-radius:10px; padding:14px 26px; font-size:1rem; font-weight:700;
+    font-family:inherit; cursor:pointer; color:#fff; background:var(--brand-2); transition:.15s;
+  }
+  .btn:hover:not(:disabled){background:#125c73}
+  .btn:disabled{background:#c2cdd8; cursor:not-allowed}
+  .btn.ghost{background:transparent; color:var(--brand-2); border:1.5px solid var(--line)}
+  .btn.ghost:hover{background:var(--soft)}
+
+  /* Success panel */
+  .ok{
+    background:var(--surface); border:1px solid #bfe6d3; border-radius:var(--radius);
+    box-shadow:0 1px 2px rgba(14,27,41,.05),0 10px 30px rgba(31,157,107,.12);
+    padding:26px 24px;
+  }
+  .ok-ico{width:46px;height:46px;border-radius:50%;background:#eafaf2;color:var(--accent-d);
+    display:grid;place-items:center;font-size:24px;font-weight:800}
+  .ok h2{margin:16px 0 4px; font-size:1.25rem; font-weight:800}
+  .ok > p{margin:0; color:var(--muted); font-size:.95rem}
+  .ident{margin:18px 0 0; border-top:1px solid var(--line-2); padding-top:16px;
+    display:grid; grid-template-columns:1fr 1fr; gap:14px 22px}
+  .ident .row{min-width:0}
+  .ident .k{font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+  .ident .v{font-size:.98rem; font-weight:600; color:var(--ink); margin-top:2px; word-break:break-word}
+  .ok-actions{display:flex; gap:12px; justify-content:flex-end; margin-top:22px; flex-wrap:wrap}
+
+  footer{text-align:center; color:#8896a3; font-size:.78rem; margin-top:40px}
+
+  /* Toast */
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:#fff; padding:12px 20px; border-radius:10px; font-size:.9rem;
+    box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:.25s; z-index:50}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  .hidden{display:none}
+
+  @media (max-width:560px){
+    h1{font-size:1.4rem}
+    .grid{grid-template-columns:1fr}
+    .ident{grid-template-columns:1fr}
+    .ok-actions{justify-content:stretch}
+    .ok-actions .btn{flex:1}
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><span class="mark"><span>U</span></span> UNAB · Facultad de Ingeniería</div>
+    <div class="flow">
+      <span class="dot on"></span> Identificación
+      <span class="sep"></span>
+      <span class="dot"></span> Convalidación
+    </div>
+    <h1>Acceso del postulante</h1>
+    <p>Antes de revisar tu posible convalidación, identifícate con tus datos. Usaremos esta información para registrar tu solicitud y comunicarte el resultado.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="step" id="formCard">
+    <div class="step-lbl"><span class="n">1</span> Identificación del postulante</div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="tipoDoc">Tipo de documento</label>
+        <select id="tipoDoc">
+          <option value="rut">RUT</option>
+          <option value="pasaporte">Pasaporte</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="doc" id="docLbl">RUT</label>
+        <input type="text" id="doc" inputmode="text" autocomplete="off" placeholder="12.345.678-9">
+        <span class="msg" id="docMsg">Ingresa un RUT válido.</span>
+      </div>
+
+      <div class="field">
+        <label for="nombres">Nombres</label>
+        <input type="text" id="nombres" autocomplete="given-name" placeholder="Ej.: María José">
+        <span class="msg" id="nombresMsg">Ingresa tus nombres.</span>
+      </div>
+
+      <div class="field">
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" autocomplete="family-name" placeholder="Ej.: Pérez Soto">
+        <span class="msg" id="apellidosMsg">Ingresa tus apellidos.</span>
+      </div>
+
+      <div class="field full">
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" autocomplete="email" placeholder="nombre@correo.com">
+        <span class="msg" id="correoMsg">Ingresa un correo válido.</span>
+      </div>
+
+      <div class="field full">
+        <label for="fono">Teléfono <span class="opt">· opcional</span></label>
+        <input type="tel" id="fono" autocomplete="tel" placeholder="+56 9 1234 5678">
+        <span class="msg" id="fonoMsg">Revisa el teléfono ingresado.</span>
+      </div>
+    </div>
+
+    <div class="consent" id="consentBox" style="margin-top:18px">
+      <input type="checkbox" id="consent">
+      <label for="consent">Autorizo el tratamiento de mis datos personales para gestionar mi solicitud de convalidación, conforme a la normativa vigente de protección de datos. Puedo ejercer mis derechos ante la institución.</label>
+    </div>
+
+    <div class="run-row">
+      <button class="btn" id="btnContinuar">Continuar a la convalidación</button>
+    </div>
+  </section>
+
+  <!-- Estado de confirmación -->
+  <section class="ok hidden" id="okCard" aria-live="polite">
+    <div class="ok-ico">✓</div>
+    <h2>Identidad registrada</h2>
+    <p>Listo. Ya puedes continuar a evaluar tus asignaturas.</p>
+    <div class="ident" id="identResumen"></div>
+    <div class="ok-actions">
+      <button class="btn ghost" id="btnEditar">Editar datos</button>
+      <button class="btn" id="btnIr">Ir a la convalidación</button>
+    </div>
+  </section>
+
+  <footer>Acceso del postulante · Tus datos se usan solo para gestionar tu solicitud de convalidación.</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   ACCESO DEL POSTULANTE — Paso 1 del sistema de convalidación UNAB
+   100% en el navegador. Valida identidad y entrega el control al Paso 2.
+   ========================================================================= */
+
+/* Página de destino tras identificarse (ajusta al nombre real de tu archivo
+   de convalidación, p.ej. 'index.html' o 'convalidacion.html'). */
+const URL_CONVALIDACION = 'convalidacion.html';
+
+const $ = id => document.getElementById(id);
+
+/* ---- Toast (mismo patrón que la herramienta de convalidación) ---------- */
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ---- Validación de RUT chileno (módulo 11) ----------------------------- */
+function limpiarRUT(v){ return String(v||'').replace(/[^0-9kK]/g,'').toUpperCase(); }
+function validarRUT(v){
+  const r = limpiarRUT(v);
+  if(!/^\d{7,8}[0-9K]$/.test(r)) return false;
+  const cuerpo = r.slice(0,-1), dv = r.slice(-1);
+  let suma = 0, mul = 2;
+  for(let i = cuerpo.length-1; i >= 0; i--){
+    suma += parseInt(cuerpo[i],10) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const resto = 11 - (suma % 11);
+  const dvCalc = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+  return dvCalc === dv;
+}
+function formatearRUT(v){
+  const r = limpiarRUT(v);
+  if(r.length <= 1) return r;
+  const cuerpo = r.slice(0,-1), dv = r.slice(-1);
+  return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + dv;
+}
+
+/* ---- Validadores de los demás campos ----------------------------------- */
+const reCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function validarCorreo(v){ return reCorreo.test(String(v||'').trim()); }
+function validarTelefono(v){
+  const t = String(v||'').trim();
+  if(!t) return true; // opcional
+  return /^[+0-9()\s-]{8,18}$/.test(t) && (t.replace(/\D/g,'').length >= 8);
+}
+function noVacio(v){ return String(v||'').trim().length >= 2; }
+
+/* ---- Manejo de errores por campo --------------------------------------- */
+function marcar(idCampo, ok, idBox){
+  const box = $(idBox || idCampo).closest('.field') || $(idBox || idCampo);
+  if(!box) return ok;
+  box.classList.toggle('err', !ok);
+  const inp = $(idCampo); if(inp) inp.setAttribute('aria-invalid', String(!ok));
+  return ok;
+}
+
+/* ---- Alternar etiqueta y validación según tipo de documento ------------ */
+function tipoActual(){ return $('tipoDoc').value; }
+function refrescarTipoDoc(){
+  const esRut = tipoActual() === 'rut';
+  $('docLbl').textContent = esRut ? 'RUT' : 'Pasaporte';
+  const doc = $('doc');
+  doc.placeholder = esRut ? '12.345.678-9' : 'Ej.: AB1234567';
+  $('docMsg').textContent = esRut ? 'Ingresa un RUT válido.' : 'Ingresa el número de pasaporte.';
+  doc.value = '';
+  doc.closest('.field').classList.remove('err');
+}
+function validarDoc(){
+  const v = $('doc').value;
+  if(tipoActual() === 'rut') return validarRUT(v);
+  return /^[A-Za-z0-9]{5,15}$/.test(String(v||'').replace(/\s/g,''));
+}
+
+/* ---- Recolección y validación global ----------------------------------- */
+function recolectar(){
+  return {
+    tipoDoc:   tipoActual(),
+    documento: tipoActual()==='rut' ? formatearRUT($('doc').value) : $('doc').value.trim().toUpperCase(),
+    nombres:   $('nombres').value.trim(),
+    apellidos: $('apellidos').value.trim(),
+    correo:    $('correo').value.trim(),
+    telefono:  $('fono').value.trim(),
+    consentimiento: $('consent').checked,
+    registradoEn: new Date().toISOString()
+  };
+}
+function validarTodo(){
+  const okDoc    = marcar('doc', validarDoc());
+  const okNom    = marcar('nombres', noVacio($('nombres').value));
+  const okApe    = marcar('apellidos', noVacio($('apellidos').value));
+  const okCorreo = marcar('correo', validarCorreo($('correo').value));
+  const okFono   = marcar('fono', validarTelefono($('fono').value));
+  const okCons   = $('consent').checked;
+  $('consentBox').classList.toggle('err', !okCons);
+  return okDoc && okNom && okApe && okCorreo && okFono && okCons;
+}
+
+/* ---- Persistencia para el Paso 2 (con resguardo en sandbox) ------------ */
+function persistir(p){
+  try{ sessionStorage.setItem('postulante', JSON.stringify(p)); }
+  catch(e){ /* entornos sin storage: el dato igual queda en window.POSTULANTE */ }
+  window.POSTULANTE = p;
+}
+
+/* ---- Mostrar confirmación ---------------------------------------------- */
+function pintarResumen(p){
+  const tipoTxt = p.tipoDoc === 'rut' ? 'RUT' : 'Pasaporte';
+  const filas = [
+    ['Nombre', (p.nombres + ' ' + p.apellidos).trim()],
+    [tipoTxt, p.documento],
+    ['Correo', p.correo],
+    ['Teléfono', p.telefono || '—']
+  ];
+  $('identResumen').innerHTML = filas.map(([k,v])=>
+    `<div class="row"><div class="k">${k}</div><div class="v">${v.replace(/[<>&]/g,'')}</div></div>`
+  ).join('');
+}
+
+/* ---- Eventos ------------------------------------------------------------ */
+function init(){
+  // Formateo en vivo del RUT
+  $('doc').addEventListener('input', e=>{
+    if(tipoActual()==='rut'){
+      const pos = e.target.selectionEnd === e.target.value.length;
+      e.target.value = formatearRUT(e.target.value);
+      if(pos) e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+    }
+  });
+  $('doc').addEventListener('blur', ()=> marcar('doc', $('doc').value==='' || validarDoc()));
+  $('tipoDoc').addEventListener('change', refrescarTipoDoc);
+
+  // Limpiar error al corregir
+  ['nombres','apellidos','correo','fono'].forEach(id=>{
+    $(id).addEventListener('input', ()=> $(id).closest('.field').classList.remove('err'));
+  });
+  $('consent').addEventListener('change', ()=> $('consentBox').classList.remove('err'));
+
+  // Continuar
+  $('btnContinuar').addEventListener('click', ()=>{
+    if(!validarTodo()){ toast('Revisa los campos marcados antes de continuar.'); return; }
+    const p = recolectar();
+    persistir(p);
+    pintarResumen(p);
+    $('formCard').classList.add('hidden');
+    $('okCard').classList.remove('hidden');
+    $('okCard').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // Volver a editar
+  $('btnEditar').addEventListener('click', ()=>{
+    $('okCard').classList.add('hidden');
+    $('formCard').classList.remove('hidden');
+    $('formCard').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // Ir a la convalidación (Paso 2)
+  $('btnIr').addEventListener('click', ()=>{
+    try{ window.location.href = URL_CONVALIDACION; }
+    catch(e){ toast('Configura la ruta de la página de convalidación.'); }
+  });
+
+  refrescarTipoDoc();
+}
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+/* Barra de exportación de la propuesta + versión imprimible */
+
+.pz-bar{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:16px}
+.pz-lbl{font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-right:4px}
+.pz-btn{display:inline-flex; align-items:center; gap:7px; appearance:none; cursor:pointer;
+  font:inherit; font-size:.88rem; font-weight:650; padding:9px 14px; border-radius:10px; transition:.15s}
+.pz-btn:disabled{opacity:.6; cursor:progress}
+.pz-btn svg{flex:none}
+
+.pz-claro .pz-lbl{color:#5a6b7b}
+.pz-claro .pz-btn{background:#fff; color:#16708c; border:1.5px solid #d6dfe8}
+.pz-claro .pz-btn:hover:not(:disabled){background:#f3f6f9; border-color:#16708c}
+
+.pz-oscuro .pz-lbl{color:#b9d2dd}
+.pz-oscuro .pz-btn{background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.22)}
+.pz-oscuro .pz-btn:hover:not(:disabled){background:rgba(255,255,255,.16)}
+
+.pz-toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px); z-index:200;
+  max-width:min(92vw,520px); background:#0e1b29; color:#fff; padding:12px 18px; border-radius:10px;
+  font:500 .9rem/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:.25s}
+.pz-toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+
+@media (max-width:560px){ .pz-btn{flex:1 1 auto; justify-content:center} .pz-lbl{flex-basis:100%} }
+@media (prefers-reduced-motion:reduce){ .pz-btn,.pz-toast{transition:none} }
+
+/* ---- Documento imprimible --------------------------------------------- */
+.pz-print{display:none}
+
+@media print{
+  @page{size:A4; margin:14mm 14mm 16mm}
+  body.pz-imprimiendo{background:#fff !important; padding:0 !important; margin:0 !important}
+  body.pz-imprimiendo > *:not(#propuestaPrint){display:none !important}
+  body.pz-imprimiendo #propuestaPrint{display:block}
+
+  .pz-print{font:10pt/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:#0e1b29;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact}
+  .pz-h{display:flex; justify-content:space-between; align-items:flex-end; gap:16px;
+    background:#0a2a43; color:#fff; padding:14px 16px; border-bottom:3px solid #16708c; margin-bottom:14px}
+  .pz-inst{font-size:7.5pt; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#b9d2dd}
+  .pz-h h1{margin:4px 0 0; font-size:16pt; line-height:1.15}
+  .pz-folio{font-size:8pt; text-align:right; color:#d6e6ee; white-space:nowrap}
+  .pz-print section{margin:0 0 12px}
+  .pz-print h2{font-size:9pt; letter-spacing:.07em; text-transform:uppercase; color:#16708c;
+    border-bottom:1px solid #e0e6ed; padding-bottom:3px; margin:0 0 7px; break-after:avoid}
+  .pz-kv{display:grid; grid-template-columns:1fr 1fr; gap:4px 18px; margin:0}
+  .pz-kv div{display:flex; gap:8px; min-width:0}
+  .pz-kv dt{flex:0 0 36%; font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#5a6b7b; padding-top:1px}
+  .pz-kv dd{margin:0; font-weight:600; word-break:break-word}
+  .pz-t{width:100%; border-collapse:collapse; font-size:8.5pt}
+  .pz-t th{background:#0a2a43; color:#fff; text-align:left; padding:4px 5px; font-weight:700}
+  .pz-t td{border-bottom:1px solid #e0e6ed; padding:4px 5px; vertical-align:top}
+  .pz-t tr:nth-child(even) td{background:#f3f6f9}
+  .pz-t tr{break-inside:avoid}
+  .pz-t thead{display:table-header-group}
+  .pz-cod{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:8pt; white-space:nowrap}
+  .pz-t em{color:#5a6b7b; font-size:7.5pt}
+  .pz-vacio{color:#5a6b7b; font-style:italic; margin:0}
+  .pz-res, .pz-firmas{break-inside:avoid}
+  .pz-cifras{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .pz-cifras div{border:1px solid #e0e6ed; background:#f3f6f9; border-radius:6px; padding:7px 10px}
+  .pz-cifras b{display:block; font-size:14pt; color:#0a2a43}
+  .pz-cifras span{font-size:8pt; color:#5a6b7b}
+  .pz-obs{margin-top:9px; border:1px solid #e0e6ed; min-height:24mm; padding:6px 9px}
+  .pz-obs span{font-size:7.5pt; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#5a6b7b}
+  .pz-firmas{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:22mm !important}
+  .pz-firmas div{text-align:center; font-weight:700; font-size:8.5pt}
+  .pz-firmas span{display:block; border-top:1px solid #0e1b29; margin-bottom:4px}
+  .pz-firmas small{display:block; font-weight:400; color:#5a6b7b; font-size:7.5pt}
+  .pz-aviso{margin-top:14px; font-size:7pt; color:#5a6b7b}
+}

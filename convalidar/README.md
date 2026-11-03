@@ -8,7 +8,7 @@ Proviene del repositorio público [jorgesabattin/Convalidar](https://github.com/
 - HTML + CSS + JavaScript vanilla, sin framework ni bundler ni `package.json`.
 - Cada página es un archivo **autocontenido**: el CSS va en un `<style>` y el JS en `<script>` dentro del mismo HTML.
 - Única librería externa: **pdf.js** (Mozilla), incrustada y minificada dentro de `convalidacion.html` para leer certificados en PDF.
-- **Sin backend.** No se hacen peticiones de red al cargar ni al interactuar.
+- **Sin backend.** No se hacen peticiones de red al cargar ni al interactuar. Todo funciona sin internet.
 
 ## Flujo (3 páginas)
 1. `index.html`: acceso del postulante. Guarda sus datos en `sessionStorage["postulante"]`.
@@ -33,7 +33,41 @@ Proviene del repositorio público [jorgesabattin/Convalidar](https://github.com/
 
 Verificado con Chromium: mismos datos, mismo DOM renderizado, sin errores de consola y sin peticiones externas en las 3 páginas.
 
+## Acceso con usuario y contraseña (nuevo)
+- `login.html` es la puerta de entrada: `index.html`, `convalidacion.html` y `malla.html` redirigen ahí si no hay sesión.
+- Los usuarios están en `assets/usuarios.js`, con sal + hash SHA-256 (sin contraseñas en texto plano).
+  Para crear o cambiar uno, abre `herramientas/generar-usuario.html` y pega el bloque que genera.
+- **Usuario inicial: `admin` / `Unab2026!`. Cámbialo antes de publicar.**
+- La sesión dura 8 h o hasta cerrar la pestaña. Tras 5 intentos fallidos hay que esperar 30 s.
+  "Cerrar sesión" también borra los datos del postulante y del resultado.
+- ⚠️ El sitio no tiene servidor, así que la verificación ocurre en el navegador. Disuade el acceso casual,
+  pero quien lea el código puede saltársela. Para proteger de verdad datos personales, hay que poner el control en el hosting:
+  por ejemplo, la protección por contraseña de Netlify o Cloudflare Access delante del sitio, o un backend con login.
+  En un repo público de GitHub Pages los hashes quedan a la vista, así que conviene usar contraseñas largas.
+
+## Propuesta: imprimir, PDF y Excel (nuevo)
+Al final de `convalidacion.html` (junto a "Ver mi malla") y en la cabecera de `malla.html` hay tres botones:
+- **Imprimir**: abre el diálogo de impresión con una versión A4 de la propuesta (también sirve para "Guardar como PDF").
+- **Descargar PDF**: genera `Propuesta_convalidacion_<apellidos>_<fecha>.pdf` con jsPDF.
+- **Formulario Excel**: genera `Formulario_convalidacion_<apellidos>_<fecha>.xlsx` con ExcelJS. Tiene dos hojas:
+  - *Formulario*: datos del postulante, antecedentes, detalle por asignatura (nota, % de coincidencia, % de aprendizajes
+    esperados, sugerencia, decisión), columnas en blanco para "Resolución Dirección" y "Observaciones" con listas desplegables,
+    totales con fórmulas que se recalculan si se cambia una decisión, y espacio para firmas.
+  - *Plan de estudios*: todos los ramos de la carrera con su estado.
+
+Para esto, `convalidacion.html` ahora guarda en `sessionStorage["convalidacion_resultado"]` también `detalle`
+(una fila por asignatura de origen, con su decisión Aceptada / Rechazada / Sin candidato) y `certificado`.
+
+Archivos nuevos:
+
+    login.html                       pantalla de acceso
+    assets/auth.js                   sesión, guardia de páginas, SHA-256
+    assets/usuarios.js               lista de usuarios autorizados
+    assets/propuesta.js / .css       modelo de la propuesta, impresión, PDF y Excel
+    herramientas/generar-usuario.html
+    vendor/                          jsPDF 4.2.1, jspdf-autotable 5.0.9, ExcelJS 4.4.0 (MIT, se cargan al pulsar el botón)
+
 ## Ejecutar
-Abre `index.html` en el navegador, o sírvelo localmente:
+Abre `login.html` (o `index.html`, que redirige) en el navegador, o sírvelo localmente:
 
     python3 -m http.server 8000   # luego http://localhost:8000/index.html

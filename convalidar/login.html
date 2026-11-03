@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iniciar sesión · Convalidación UNAB</title>
+<script src="assets/usuarios.js"></script>
+<script src="assets/auth.js"></script>
+<style>
+  :root{
+    --bg:#eef1f5; --surface:#ffffff; --ink:#0e1b29; --muted:#5a6b7b;
+    --line:#e0e6ed; --line-2:#eef2f6;
+    --brand:#0a2a43; --brand-2:#16708c; --accent:#1f9d6b;
+    --err:#c8453a; --soft:#f3f6f9;
+    --shadow:0 1px 2px rgba(14,27,41,.05), 0 8px 28px rgba(14,27,41,.07);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased;
+    background:linear-gradient(160deg,var(--brand) 0%, #103a59 55%, var(--bg) 55.1%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:56px 16px 40px;
+  }
+  .brand{display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.04em; color:#fff}
+  .brand .mark{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;
+    background:var(--brand-2); font-size:18px; font-weight:900}
+  .intro{color:#fff; text-align:center; margin:22px 0 26px; max-width:440px}
+  .intro h1{font-size:1.7rem; line-height:1.15; margin:0 0 8px; font-weight:800; letter-spacing:-.01em}
+  .intro p{margin:0; color:#b9d2dd; font-size:.97rem}
+
+  .card{width:100%; max-width:420px; background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:28px 26px}
+  .field{display:flex; flex-direction:column; gap:6px; margin-bottom:16px}
+  .field label{font-size:.84rem; font-weight:600}
+  .inp{position:relative}
+  input{width:100%; padding:13px 14px; font-size:1rem; font-family:inherit;
+    border:1.5px solid var(--line); border-radius:10px; background:#fff; color:var(--ink)}
+  input:focus{outline:none; border-color:var(--brand-2); box-shadow:0 0 0 3px rgba(22,112,140,.15)}
+  #clave{padding-right:84px}
+  .ver{position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    border:0; background:var(--soft); color:var(--brand-2); font:inherit; font-size:.8rem; font-weight:700;
+    padding:6px 10px; border-radius:7px; cursor:pointer}
+  .err{display:none; margin:0 0 14px; padding:11px 13px; border-radius:10px;
+    background:#fbf0ef; border:1px solid #f0c9c4; color:#8f2e25; font-size:.88rem}
+  .err.on{display:block}
+  .btn{width:100%; border:none; border-radius:10px; padding:14px 26px; font-size:1rem; font-weight:700;
+    font-family:inherit; cursor:pointer; color:#fff; background:var(--brand-2); transition:.15s}
+  .btn:hover:not(:disabled){background:#125c73}
+  .btn:disabled{background:#c2cdd8; cursor:not-allowed}
+  .nota{margin:18px 0 0; font-size:.8rem; color:var(--muted); text-align:center}
+  footer{margin-top:auto; padding-top:36px; text-align:center; color:#8896a3; font-size:.78rem}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+  <div class="brand"><span class="mark">U</span> UNAB · Facultad de Ingeniería</div>
+  <div class="intro">
+    <h1>Convalidación de asignaturas</h1>
+    <p>Ingresa con tu usuario y contraseña para acceder al sistema de reconocimiento de aprendizajes previos.</p>
+  </div>
+
+  <form class="card" id="form" novalidate autocomplete="on">
+    <div class="err" id="err" role="alert"></div>
+    <div class="field">
+      <label for="usuario">Usuario</label>
+      <input type="text" id="usuario" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    </div>
+    <div class="field">
+      <label for="clave">Contraseña</label>
+      <div class="inp">
+        <input type="password" id="clave" name="password" autocomplete="current-password" required>
+        <button type="button" class="ver" id="ver" aria-controls="clave" aria-pressed="false">Mostrar</button>
+      </div>
+    </div>
+    <button class="btn" id="btn" type="submit">Ingresar</button>
+    <p class="nota">¿No tienes acceso? Solicítalo a la Dirección de Carrera.</p>
+  </form>
+
+  <footer>Sistema de apoyo a la convalidación · Universidad Andrés Bello</footer>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var params = new URLSearchParams(window.location.search);
+  var destino = Auth.destinoSeguro(params.get('next'));
+
+  // Si ya hay sesión válida, entrar directo.
+  if (Auth.leerSesion()){ window.location.replace(destino); return; }
+
+  /* Freno simple a intentos repetidos (5 fallos -> 30 s de espera). */
+  var MAX_INTENTOS = 5, ESPERA_MS = 30000, K = 'auth_intentos';
+  function leerIntentos(){ try{ return JSON.parse(sessionStorage.getItem(K)) || {n:0, hasta:0}; }catch(e){ return {n:0, hasta:0}; } }
+  function guardarIntentos(o){ try{ sessionStorage.setItem(K, JSON.stringify(o)); }catch(e){} }
+
+  function error(msg){ $('err').textContent = msg; $('err').classList.add('on'); }
+  function limpiar(){ $('err').classList.remove('on'); }
+
+  var timer = null;
+  function revisarBloqueo(){
+    var it = leerIntentos(), resta = it.hasta - Date.now();
+    clearTimeout(timer);
+    if (resta > 0){
+      $('btn').disabled = true;
+      error('Demasiados intentos fallidos. Espera ' + Math.ceil(resta/1000) + ' s para volver a intentarlo.');
+      timer = setTimeout(revisarBloqueo, 1000);
+      return true;
+    }
+    if ($('btn').disabled){ $('btn').disabled = false; limpiar(); }
+    return false;
+  }
+
+  $('ver').addEventListener('click', function(){
+    var v = $('clave').type === 'password';
+    $('clave').type = v ? 'text' : 'password';
+    this.textContent = v ? 'Ocultar' : 'Mostrar';
+    this.setAttribute('aria-pressed', String(v));
+  });
+  ['usuario','clave'].forEach(function(id){ $(id).addEventListener('input', function(){ if(!$('btn').disabled) limpiar(); }); });
+
+  $('form').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (revisarBloqueo()) return;
+    var u = $('usuario').value.trim(), c = $('clave').value;
+    if (!u || !c){ error('Ingresa tu usuario y tu contraseña.'); (u ? $('clave') : $('usuario')).focus(); return; }
+    var reg = Auth.verificar(u, c);
+    if (!reg){
+      var it = leerIntentos(); it.n += 1;
+      if (it.n >= MAX_INTENTOS){ it = {n:0, hasta: Date.now() + ESPERA_MS}; }
+      guardarIntentos(it);
+      $('clave').value = ''; $('clave').focus();
+      if (!revisarBloqueo()) error('Usuario o contraseña incorrectos.');
+      return;
+    }
+    guardarIntentos({n:0, hasta:0});
+    Auth.iniciarSesion(reg);
+    window.location.replace(destino);
+  });
+
+  revisarBloqueo();
+  $('usuario').focus();
+})();
+</script>
+</body>
+</html>

@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Convalidación de Asignaturas · UNAB</title>
+<script src="assets/usuarios.js"></script>
+<script src="assets/auth.js" data-proteger></script>
+<link rel="stylesheet" href="assets/propuesta.css">
+<script src="assets/propuesta.js"></script>
 <style>
   :root{
     --bg:#eef1f5; --surface:#ffffff; --ink:#0e1b29; --muted:#5a6b7b;
@@ -5823,11 +5827,43 @@ function render(evals, carrera){
     return {conv: Array.from(new Set(conv))};
   }
 
+  /* Detalle por asignatura de origen: lo usa la propuesta (PDF / Excel). */
+  function detalleEvaluacion(){
+    return evals.map(({prog,ranking,nota},idx)=>{
+      const top=ranking[0];
+      const score=top?top.score:0;
+      const candidato=!!(top && top.asig && score>=UMBRAL_REVISION);
+      return {
+        origen: prog.nombre, archivo: prog.archivo||'',
+        nota: nota?nota.nota:null, notaAsignatura: nota?nota.asignatura:'', aprobado: nota?nota.aprobado:null,
+        codigo: candidato?top.asig.codigo:'', nombre: candidato?top.asig.nombre:'',
+        semestre: candidato?top.asig.semestre:'', creditos: candidato?(top.asig.creditos||0):0,
+        coincidencia: top?pct(score):null,
+        aeCubiertos: (candidato && top.aeTot)?top.aePct:null,
+        aeTexto: (candidato && top.aeTot)?(top.aeCov+' de '+top.aeTot):'',
+        sugerencia: statusFinal(score, nota).lbl,
+        decision: candidato?(decisiones[idx]?'Aceptada':'Rechazada'):'Sin candidato'
+      };
+    });
+  }
+  function datosCertificado(){
+    if(!certArchivo) return null;
+    const ver={firmado:'Firmado electrónicamente', firmado_revisar:'Firmado · revisar',
+               sospechoso:'Requiere atención', sin_firma:'Sin firma digital'};
+    return {
+      archivo: certArchivo,
+      institucion: certVerif&&certVerif.inst?certVerif.inst.nombre:'',
+      verificacion: certVerif?(ver[certVerif.veredicto]||''):'',
+      notasDetectadas: certEntradas.length
+    };
+  }
+
   function guardarYActualizar(){
     const {conv}=codigosDecididos();
     try{
       sessionStorage.setItem('convalidacion_resultado', JSON.stringify({
-        carrera, convalidadas:conv, revision:[], generadoEn:new Date().toISOString()
+        carrera, convalidadas:conv, revision:[], generadoEn:new Date().toISOString(),
+        detalle: detalleEvaluacion(), certificado: datosCertificado()
       }));
     }catch(e){}
     resumenSpan.textContent = conv.length + ' convalidable' + (conv.length===1?'':'s')
@@ -5859,6 +5895,7 @@ function render(evals, carrera){
   resumenSpan.style.cssText='color:var(--muted);font-size:.86rem';
   cta.appendChild(btnMalla); cta.appendChild(resumenSpan);
   cont.appendChild(cta);
+  if(window.Propuesta) Propuesta.montarBarra(cont, {plan:()=>BASE_UNAB, variante:'claro', etiqueta:'Descargar propuesta'});
   guardarYActualizar();
   btnMalla.addEventListener('click',()=>{ window.location.href=URL_MALLA; });
 

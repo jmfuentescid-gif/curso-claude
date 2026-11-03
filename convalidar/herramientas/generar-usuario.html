@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generar usuario · Convalidación UNAB</title>
+<script src="../assets/auth.js"></script>
+<style>
+  :root{--ink:#0e1b29;--muted:#5a6b7b;--line:#e0e6ed;--brand:#0a2a43;--brand-2:#16708c;--bg:#eef1f5}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.5;padding:32px 16px}
+  main{max-width:680px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 24px}
+  h1{font-size:1.35rem;margin:0 0 6px}
+  p{color:var(--muted);margin:0 0 18px;font-size:.93rem}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  label{display:flex;flex-direction:column;gap:6px;font-size:.84rem;font-weight:600}
+  input{padding:11px 12px;font:inherit;font-size:.98rem;border:1.5px solid var(--line);border-radius:9px}
+  input:focus{outline:none;border-color:var(--brand-2)}
+  button{margin-top:16px;border:0;border-radius:9px;padding:12px 20px;font:inherit;font-weight:700;color:#fff;background:var(--brand-2);cursor:pointer}
+  pre{margin:18px 0 0;padding:14px;border-radius:10px;background:#0f1d2b;color:#d8ecf5;font-size:.82rem;white-space:pre-wrap;word-break:break-all;min-height:3em}
+  .ok{color:#157a52;font-size:.85rem;margin-top:8px;min-height:1.2em}
+  @media (max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Generar usuario</h1>
+  <p>Escribe los datos del usuario y pulsa <b>Generar</b>. Copia el bloque resultante dentro de la lista <code>usuarios</code> de
+    <code>assets/usuarios.js</code>. La contraseña no sale de este navegador y no queda escrita en el bloque.</p>
+  <form id="f">
+    <div class="grid">
+      <label>Usuario <input id="u" required autocomplete="off" autocapitalize="none"></label>
+      <label>Contraseña <input id="c" type="password" required autocomplete="new-password" minlength="8"></label>
+      <label>Nombre visible <input id="n" placeholder="Ej.: María Pérez"></label>
+      <label>Rol <input id="r" placeholder="Ej.: Coordinación Académica"></label>
+    </div>
+    <button type="submit">Generar</button>
+  </form>
+  <pre id="out"></pre>
+  <div class="ok" id="ok"></div>
+</main>
+<script>
+document.getElementById('f').addEventListener('submit', function(e){
+  e.preventDefault();
+  var u = document.getElementById('u').value.trim().toLowerCase();
+  var c = document.getElementById('c').value;
+  if (c.length < 8){ document.getElementById('ok').textContent = 'Usa una contraseña de al menos 8 caracteres.'; return; }
+  var bytes = new Uint8Array(16); crypto.getRandomValues(bytes);
+  var salt = Array.from(bytes, function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+  var hash = Auth.hashCredencial(salt, u, c);
+  var q = function(s){ return "'" + String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'"; };
+  var bloque = '    {\n' +
+    '      usuario: ' + q(u) + ',\n' +
+    '      nombre: ' + q(document.getElementById('n').value.trim() || u) + ',\n' +
+    '      rol: ' + q(document.getElementById('r').value.trim()) + ',\n' +
+    '      salt: ' + q(salt) + ',\n' +
+    '      hash: ' + q(hash) + '\n' +
+    '    }';
+  document.getElementById('out').textContent = bloque;
+  document.getElementById('c').value = '';
+  var msg = document.getElementById('ok');
+  if (navigator.clipboard){ navigator.clipboard.writeText(bloque).then(function(){ msg.textContent = 'Copiado al portapapeles.'; }, function(){ msg.textContent = 'Selecciona y copia el bloque.'; }); }
+  else msg.textContent = 'Selecciona y copia el bloque.';
+});
+</script>
+</body>
+</html>

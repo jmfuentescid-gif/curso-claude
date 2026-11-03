@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Malla curricular · Convalidación UNAB</title>
+<script src="assets/usuarios.js"></script>
+<script src="assets/auth.js" data-proteger></script>
+<link rel="stylesheet" href="assets/propuesta.css">
+<script src="assets/propuesta.js"></script>
 <style>
   :root{
     --brand:#0a2a43; --brand-2:#16708c; --accent:#1f9d6b; --accent-deep:#15875a;
@@ -229,6 +233,7 @@
   </div>
 
   <div class="stats" id="stats"></div>
+  <div id="exportBar"></div>
 </header>
 
 <div class="legend" id="legend"></div>
@@ -5472,6 +5477,7 @@ let _rt;
 window.addEventListener("resize",()=>{ clearTimeout(_rt); _rt=setTimeout(dibujarFlechas,120); });
 
 /* ---- init ---- */
+if(window.Propuesta) Propuesta.montarBarra($("exportBar"), {plan:()=>MALLAS, variante:"oscuro", etiqueta:"Propuesta de convalidación"});
 pintarIdentidad();
 pintarSelector();
 render();
